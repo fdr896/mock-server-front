@@ -1,4 +1,4 @@
-import { ManagerBase } from "./base_manager";
+import { ManagerBase } from './base_manager';
 
 const staticRoutesGroup = '/routes/static';
 
@@ -21,6 +21,16 @@ export class StaticRoutesManager extends ManagerBase {
         .catch((error) => {
             onFail(error);
         });
+    }
+
+    UpdateRoute(data, onSuccess, onFail) {
+        this.doPutApi(staticRoutesGroup, data)
+        .then(({status, data}) => {
+            onSuccess(status, data);
+        })
+        .catch((error) => {
+            onFail(error);
+        })
     }
 
     DeleteRoute(params, onSuccess, onFail) {

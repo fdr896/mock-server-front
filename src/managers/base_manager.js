@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BackendEndpoint = "http://62.84.125.40";
+const BackendEndpoint = 'http://62.84.125.40';
 
 export function InitManagers() {
     axios.defaults.mode = 'no-cors';
@@ -11,19 +11,25 @@ export function InitManagers() {
 
 export class ManagerBase {
     async doGetApi(route) {
-        const url = "/api" + route;
+        const url = '/api' + route;
 
         return await this.doGet(url);
     }
 
     async doPostApi(route, data) {
-        const url = "/api" + route;
+        const url = '/api' + route;
 
         return await this.doPost(url, data);
     }
 
+    async doPutApi(route, data) {
+        const url = '/api' + route;
+
+        return await this.doPut(url, data);
+    }
+
     async doDeleteApi(route, params) {
-        const url = "/api" + route;
+        const url = '/api' + route;
 
         return await this.doDelete(url, params);
     }
@@ -56,6 +62,22 @@ export class ManagerBase {
             };
         } catch (error) {
             console.log(`POST ${route} failed:\n ${error}`);
+            throw error;
+        }
+    }
+
+    async doPut(route, data) {
+        const url = BackendEndpoint + route;
+
+        try {
+            const response = await axios.put(url, data);
+            console.debug(`PUT ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
+            return {
+                status: response.status,
+                data: response.data
+            };
+        } catch (error) {
+            console.log('PUT ${route} failed:\n ${error}');
             throw error;
         }
     }

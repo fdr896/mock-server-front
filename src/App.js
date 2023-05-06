@@ -1,6 +1,8 @@
 import React from 'react';
 import './App.css';
 
+import { createTheme, ThemeProvider } from '@mui/material';
+
 import NavBar from './NavBar';
 import StaticRoutes from './StaticRoutes';
 import { InitManagers } from './managers/base_manager';

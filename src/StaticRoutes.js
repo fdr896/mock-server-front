@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+import { Button, Input } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
+
 import { StaticRoutesManager } from './managers/static_routes_manager';
 
 function StaticRoutes(props) {
@@ -10,18 +13,27 @@ function StaticRoutes(props) {
 
     const [routes, setRoutes] = useState([]);
 
+    const [curUpdatingRoute, setCurUpdatingRoute] = useState('');
+    const [curUpdatingResponse, setCurUpdatingResponse] = useState('');
+    const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
+    const [failedInputRoute, setFailedInputRoute] = useState(false);
+
     const updateRoutes = () => {
       manager.List(
         (status, data) => {
-          if (status === 200) {
-            setRoutes(data.endpoints);
-            console.debug('Routes updated!');
-          } else {
-            alert(JSON.stringify({
-              message: 'Your request seems wrong',
-              status: status,
-              error: data.error,
-            }));
+          switch (status) {
+            case 200:
+              setRoutes(data.endpoints);
+              console.debug('Routes updated!');
+              break;
+
+            default:
+              alert(JSON.stringify({
+                message: 'Your request seems wrong',
+                status: status,
+                error: data.error,
+              }));
           }
       }, (error) => {
         alert(JSON.stringify({
@@ -34,26 +46,29 @@ function StaticRoutes(props) {
       updateRoutes();
     }, []);
 
-    const addRoute = () => {
+    const addRoute = (route, response) => {
         manager.AddRoute({
-          path: curRoute,
-          expected_response: curExpResp
+          path: route,
+          expected_response: response,
         }, (status, data) => {
-          if (status === 200) {
-            console.log(JSON.stringify({
-              message: data,
-              status: 200,
-            }));
-            setCurRoute('');
-            setCurExpResp('');
+          switch (status) {
+            case 200:
+              console.log(JSON.stringify({
+                message: data,
+                status: 200,
+              }));
+              setCurRoute('');
+              setCurExpResp('');
 
-            updateRoutes();
-          } else {
-            alert(JSON.stringify({
-              message: 'Your request seems wrong',
-              status: status,
-              error: data.error,
-            }));
+              updateRoutes();
+              break;
+
+            default:
+              alert(JSON.stringify({
+                message: 'Your request seems wrong',
+                status: status,
+                error: data.error,
+              }));
           }
         }, (error) => {
           alert(JSON.stringify({
@@ -63,17 +78,54 @@ function StaticRoutes(props) {
         })
     };
 
+    const updateRoute = (route, response) => {
+      manager.UpdateRoute({
+        path: route,
+        expected_response: response,
+      }, (status, data) => {
+        switch (status) {
+          case 204:
+            console.log(JSON.stringify({
+              message: data,
+              status: 200,
+            }));
+            updateRoutes();
+            break;
+
+          default:
+            alert(JSON.stringify({
+              message: 'Your request seems wrong',
+              status: status,
+              error: data.error,
+            }));
+        }
+      }, (error) => {
+          alert(JSON.stringify({
+            message: 'Failed to update route',
+            error: error,
+          }));
+      })
+    };
+
     const deleteRoute = (route) => {
       manager.DeleteRoute({
         path: route
       }, (status, data) => {
-        if (status === 200) {
-          console.log(JSON.stringify({
-            message: data,
-            status: 200,
-          }));
-
-          updateRoutes();
+        switch (status) {
+          case 204:
+            console.log(JSON.stringify({
+              message: data,
+              status: 200,
+            }));
+            updateRoutes();
+            break;
+          
+          default:
+            alert(JSON.stringify({
+              message: 'Your request seems wrong',
+              status: status,
+              error: data.error,
+            }));
         }
       }, (error) => {
           alert(JSON.stringify({
@@ -86,14 +138,17 @@ function StaticRoutes(props) {
     const getExpectedResponse = (route) => {
       manager.doGet(route)
       .then(({status, data}) => {
-        if (status === 200) {
-          alert(JSON.stringify({
-            'Expected response': data,
-          }));
-        } else {
-          alert(JSON.stringify({
-            message: data,
-          }));
+        switch (status) {
+          case 200:
+            alert(data)
+            break;
+          
+          default:
+            alert(JSON.stringify({
+              message: 'Your request seems wrong',
+              status: status,
+              error: data.error,
+            }));
         }
       })
       .catch((error) => {
@@ -107,7 +162,7 @@ function StaticRoutes(props) {
     <div {...props}>
       <div className='same-row'>
         <div>
-          <p>Type route that you want to mock</p>
+          <p><b>Type route that you want to mock:</b></p>
         </div>
 
         <div>
@@ -117,18 +172,46 @@ function StaticRoutes(props) {
                 <input
                     id='route-add'
                     value={curRoute}
-                    onChange={({target}) => setCurRoute(target.value)}
+                    pattern='\/[A-Za-z0-9_]+'
+                    onChange={(e) => {
+                      setFailedInputRoute(false);
+
+                      const newCurRoute = e.target.value;
+                      const valid = e.target.validity.valid;
+
+                      if (newCurRoute.length < curRoute.length) {
+                        setCurRoute(newCurRoute);
+                      } else if (curRoute.length === 0) {
+                        setCurRoute(newCurRoute === '/' ? newCurRoute : curRoute);
+                      } else {
+                        setCurRoute(valid ? newCurRoute : curRoute);
+                      }
+                    }}
                 />
                </div>
                <div style={{marginBottom: '1em'}}>
                 <label htmlFor='expected-add'>Expected response:</label>
-                <input
+                <br/>
+                <textarea
                     id='expected-add'
+                    style={{resize: 'none', backgroundColor: '#dbdbdb', height: '70px', width: '300px'}}
                     value={curExpResp}
-                    onChange={({target}) => setCurExpResp(target.value)}
+                    onChange={({target}) => {
+                      setFailedInputRoute(false);
+                      setCurExpResp(target.value);
+                    }}
                 />
                </div>
-               <button onClick={addRoute}>Add route!</button>
+               <Button
+                variant='contained'
+                style={{backgroundColor: !failedInputRoute ? 'blue' : 'red'}}
+                onClick={() => {
+                  if (curRoute !== '' && curRoute !== '/' && curExpResp.length > 0) {
+                    addRoute(curRoute, curExpResp);
+                  } else {
+                    setFailedInputRoute(true);
+                  }
+                }}>Add route!</Button>
              </>
         </div>
       </div>
@@ -140,17 +223,60 @@ function StaticRoutes(props) {
                return (
                 <li key={`static_route_${index}`}>
                   <div
+                    style={{marginRight: '2em'}}
                     className='clickable'
                     onClick={() => getExpectedResponse(route)}
                   >
                     {route}
                   </div>
-                  <button onClick={() => deleteRoute(route)}>Delete</button>
+                  <Button
+                    variant='outlined'
+                    style={{marginRight: '1em'}}
+                    onClick={() => deleteRoute(route)}
+                  >Delete</Button>
+                  <Button variant='outlined' onClick={() => {
+                    setCurUpdatingRoute(route);
+                    setShowUpdateDialog(true)}}
+                  >Update response</Button>
                 </li>
                );
             })}
         </ul>
       </div>
+
+      <Dialog
+        open={showUpdateDialog}
+      >
+        <DialogTitle>Update route response</DialogTitle>
+        <DialogContent>
+          <div style={{marginBottom: '1em'}}>
+            <b>Route:</b> {curUpdatingRoute}
+          </div>
+          <div style={{marginBottom: '1em'}}>
+            <label htmlFor='updating-route'><b>New response:</b> </label>
+            <Input
+              id='updating-route'
+              value={curUpdatingResponse}
+              onChange={({target}) => setCurUpdatingResponse(target.value)}
+            ></Input>
+          </div>
+          <Button
+            variant='outlined'
+            onClick={() => {
+              setShowUpdateDialog(false);
+              updateRoute(curUpdatingRoute, curUpdatingResponse);
+              setCurUpdatingResponse('');
+            }}
+          >Update</Button>
+          <Button variant='outlined'
+            onClick={() => {
+              setShowUpdateDialog(false);
+              setCurUpdatingResponse('');
+            }}
+          >
+          Discard</Button>
+        </DialogContent>
+      </Dialog>
     </div>
     );
 }
