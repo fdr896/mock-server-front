@@ -156,11 +156,7 @@ function DynamicRoutes(props) {
             break;
           
           default:
-            alert(JSON.stringify({
-              message: 'Your request seems wrong',
-              status: status,
-              error: data.error,
-            }));
+            alert(data.error);
         }
       })
       .catch((error) => {
