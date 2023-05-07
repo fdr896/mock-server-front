@@ -17,7 +17,7 @@ function StaticRoutes(props) {
     const [curUpdatingResponse, setCurUpdatingResponse] = useState('');
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
 
-    const [failedInputRoute, setFailedInputRoute] = useState(false);
+    const [failedInput, setFailedInput] = useState(false);
 
     const updateRoutes = () => {
       manager.List(
@@ -174,7 +174,7 @@ function StaticRoutes(props) {
                     value={curRoute}
                     pattern='\/[A-Za-z0-9_]+'
                     onChange={(e) => {
-                      setFailedInputRoute(false);
+                      setFailedInput(false);
 
                       const newCurRoute = e.target.value;
                       const valid = e.target.validity.valid;
@@ -197,19 +197,19 @@ function StaticRoutes(props) {
                     style={{resize: 'none', backgroundColor: '#dbdbdb', height: '70px', width: '300px'}}
                     value={curExpResp}
                     onChange={({target}) => {
-                      setFailedInputRoute(false);
+                      setFailedInput(false);
                       setCurExpResp(target.value);
                     }}
                 />
                </div>
                <Button
                 variant='contained'
-                style={{backgroundColor: !failedInputRoute ? 'blue' : 'red'}}
+                style={{backgroundColor: !failedInput ? 'blue' : 'red'}}
                 onClick={() => {
                   if (curRoute !== '' && curRoute !== '/' && curExpResp.length > 0) {
                     addRoute(curRoute, curExpResp);
                   } else {
-                    setFailedInputRoute(true);
+                    setFailedInput(true);
                   }
                 }}>Add route!</Button>
              </>
@@ -253,9 +253,9 @@ function StaticRoutes(props) {
             <b>Route:</b> {curUpdatingRoute}
           </div>
           <div style={{marginBottom: '1em'}}>
-            <label htmlFor='updating-route'><b>New response:</b> </label>
+            <label htmlFor='updating-response'><b>New response:</b> </label>
             <Input
-              id='updating-route'
+              id='updating-response'
               value={curUpdatingResponse}
               onChange={({target}) => setCurUpdatingResponse(target.value)}
             ></Input>
