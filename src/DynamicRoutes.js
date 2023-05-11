@@ -1,21 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState} from 'react';
 
-import { Button, Input } from '@mui/material';
+import { Button } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
-import { StaticRoutesManager } from './managers/static_routes_manager';
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism.css';
 
-function StaticRoutes(props) {
-    let manager = new StaticRoutesManager();
+import { DynamicRoutesManager } from './managers/dynamic_routes_manager';
 
-    const [curRoute, setCurRoute] = useState('');
-    const [curExpResp, setCurExpResp] = useState('');
+function DynamicRoutes(props) {
+    let manager = new DynamicRoutesManager();
+
+    const mandatoryCodePrefix = 'def func(';
 
     const [routes, setRoutes] = useState([]);
 
+    const [curRoute, setCurRoute] = useState('');
+    const [curCode, setCurCode] = useState(mandatoryCodePrefix);
+    
+    const [curArgs, setCurArgs] = useState('{}');
+    const [curLaunchingRoute, setCurLaunchingRoute] = useState('');
+    const [showArgsDialog, setShowArgsDialog] = useState(false);
+
     const [curUpdatingRoute, setCurUpdatingRoute] = useState('');
-    const [curUpdatingResponse, setCurUpdatingResponse] = useState('');
+    const [curUpdatingCode, setCurUpdatingCode] = useState(mandatoryCodePrefix);
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+    const [failedInputCode, setFailedInputCode] = useState(false);
 
     const [failedInput, setFailedInput] = useState(false);
 
@@ -46,10 +58,10 @@ function StaticRoutes(props) {
       updateRoutes();
     }, []);
 
-    const addRoute = (route, response) => {
+    const addRoute = (route, code) => {
         manager.AddRoute({
           path: route,
-          expected_response: response,
+          code: code,
         }, (status, data) => {
           switch (status) {
             case 200:
@@ -58,7 +70,7 @@ function StaticRoutes(props) {
                 status: 200,
               }));
               setCurRoute('');
-              setCurExpResp('');
+              setCurCode(mandatoryCodePrefix);
 
               updateRoutes();
               break;
@@ -78,10 +90,10 @@ function StaticRoutes(props) {
         })
     };
 
-    const updateRoute = (route, response) => {
+    const updateRoute = (route, code) => {
       manager.UpdateRoute({
         path: route,
-        expected_response: response,
+        code: code,
       }, (status, data) => {
         switch (status) {
           case 204:
@@ -135,8 +147,8 @@ function StaticRoutes(props) {
       });
     };
 
-    const getExpectedResponse = (route) => {
-      manager.doGet(route)
+    const launchRouteCode = (route, args) => {
+      manager.doPost(route, args)
       .then(({status, data}) => {
         switch (status) {
           case 200:
@@ -144,11 +156,7 @@ function StaticRoutes(props) {
             break;
           
           default:
-            alert(JSON.stringify({
-              message: 'Your request seems wrong',
-              status: status,
-              error: data.error,
-            }));
+            alert(data.error);
         }
       })
       .catch((error) => {
@@ -190,15 +198,16 @@ function StaticRoutes(props) {
                 />
                </div>
                <div style={{marginBottom: '1em'}}>
-                <label htmlFor='expected-add'>Expected response:</label>
+                <label htmlFor='code-text'>Code:</label>
                 <br/>
-                <textarea
-                    id='expected-add'
-                    style={{resize: 'none', backgroundColor: '#dbdbdb', height: '70px', width: '300px'}}
-                    value={curExpResp}
-                    onChange={({target}) => {
+                <Editor
+                    id='code-text'
+                    value={curCode}
+                    highlight={code => highlight(code, languages.python)}
+                    style={{resize: 'none', backgroundColor: '#dbdbdb', width: '300px', height: '300px'}}
+                    onValueChange={(newCurCode) => {
+                      setCurCode(() => newCurCode.length >= mandatoryCodePrefix.length ? newCurCode : mandatoryCodePrefix);
                       setFailedInput(false);
-                      setCurExpResp(target.value);
                     }}
                 />
                </div>
@@ -206,11 +215,24 @@ function StaticRoutes(props) {
                 variant='contained'
                 style={{backgroundColor: !failedInput ? 'blue' : 'red'}}
                 onClick={() => {
-                  if (curRoute !== '' && curRoute !== '/' && curExpResp.length > 0) {
-                    addRoute(curRoute, curExpResp);
-                  } else {
+                  const validRoute = (curRoute !== '' && curRoute !== '/');
+                  if (!validRoute) {
                     setFailedInput(true);
+                    return;
                   }
+
+                  const codeLines = curCode.split(/\r?\n/);
+                  const validCode = (
+                    codeLines.length > 1 &&
+                    codeLines[0].endsWith('):') &&
+                    codeLines[1].length > 0
+                  );
+                  if (!validCode) {
+                    setFailedInput(true);
+                    return;
+                  }
+
+                  addRoute(curRoute, curCode);
                 }}>Add route!</Button>
              </>
         </div>
@@ -225,7 +247,10 @@ function StaticRoutes(props) {
                   <div
                     style={{marginRight: '2em'}}
                     className='clickable'
-                    onClick={() => getExpectedResponse(route)}
+                    onClick={() => {
+                      setCurLaunchingRoute(route);
+                      setShowArgsDialog(true);
+                    }}
                   >
                     {route}
                   </div>
@@ -253,25 +278,90 @@ function StaticRoutes(props) {
             <b>Route:</b> {curUpdatingRoute}
           </div>
           <div style={{marginBottom: '1em'}}>
-            <label htmlFor='updating-response'><b>New response:</b> </label>
-            <Input
-              id='updating-response'
-              value={curUpdatingResponse}
-              onChange={({target}) => setCurUpdatingResponse(target.value)}
-            ></Input>
+            <label htmlFor='updating-code'><b>New code:</b></label><br/>
+            <textarea
+              id='updating-code'
+              value={curUpdatingCode}
+              style={{resize: 'none', backgroundColor: '#dbdbdb', height: '70px', width: '300px'}}
+              onChange={(e) => {
+                const newCurCode = e.target.value;
+
+                if (newCurCode.length >= mandatoryCodePrefix.length) {
+                  setFailedInputCode(false);
+                  setCurUpdatingCode(newCurCode);
+                }
+              }}
+            ></textarea>
           </div>
           <Button
             variant='outlined'
+            style={{backgroundColor: !failedInputCode ? 'blue' : 'red'}}
             onClick={() => {
+              const codeLines = curUpdatingCode.split(/\r?\n/);
+              const validCode = (
+                codeLines.length > 1 &&
+                codeLines[0].endsWith('):') &&
+                codeLines[1].length > 0
+              );
+              if (!validCode) {
+                setFailedInputCode(true);
+                return;
+              }
+
               setShowUpdateDialog(false);
-              updateRoute(curUpdatingRoute, curUpdatingResponse);
-              setCurUpdatingResponse('');
+              updateRoute(curUpdatingRoute, curUpdatingCode);
+              setCurUpdatingCode(mandatoryCodePrefix);
             }}
           >Update</Button>
           <Button variant='outlined'
             onClick={() => {
               setShowUpdateDialog(false);
-              setCurUpdatingResponse('');
+              setCurUpdatingCode(mandatoryCodePrefix);
+            }}
+          >
+          Discard</Button>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showArgsDialog}
+      >
+        <DialogTitle>Send args to route</DialogTitle>
+        <DialogContent>
+          <div style={{marginBottom: '1em'}}>
+            <label htmlFor='code-args'><b>Args (json):</b></label><br/>
+            <textarea
+              id='code-args'
+              value={curArgs}
+              style={{resize: 'none', backgroundColor: '#dbdbdb', height: '70px', width: '300px'}}
+              onChange={({target}) => {
+                  setFailedInputCode(false);
+                  setCurArgs(target.value);
+              }}
+            ></textarea>
+          </div>
+          <Button
+            variant='outlined'
+            style={{backgroundColor: !failedInputCode ? 'blue' : 'red'}}
+            onClick={() => {
+              try {
+                JSON.parse(curArgs);
+              } catch (error) {
+                alert(`Invalid args format: ${error.message.slice(12)}`);
+                return;
+              }
+
+              setShowArgsDialog(false);
+              launchRouteCode(curLaunchingRoute, curArgs);
+              setCurLaunchingRoute('');
+              setCurArgs('{}');
+            }}
+          >Send</Button>
+          <Button variant='outlined'
+            onClick={() => {
+              setShowArgsDialog(false);
+              setCurLaunchingRoute('');
+              setCurArgs('{}');
             }}
           >
           Discard</Button>
@@ -281,4 +371,4 @@ function StaticRoutes(props) {
     );
 }
 
-export default StaticRoutes;
+export default DynamicRoutes;

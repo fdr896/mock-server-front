@@ -77,7 +77,7 @@ export class ManagerBase {
                 data: response.data
             };
         } catch (error) {
-            console.log('PUT ${route} failed:\n ${error}');
+            console.log(`PUT ${route} failed:\n ${error}`);
             throw error;
         }
     }
