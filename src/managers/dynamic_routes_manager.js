@@ -13,6 +13,17 @@ export class DynamicRoutesManager extends ManagerBase {
         });
     }
 
+    GetRouteCode(path, onSuccess, onFail) {
+        const params = new URLSearchParams([['path', path]]);
+        this.doGetApi(dynamicRoutesGroup + '/code', params)
+        .then(({status, data}) => {
+            onSuccess(status, data);
+        })
+        .catch((error) => {
+            onFail(error);
+        });
+    }
+
     AddRoute(data, onSuccess, onFail) {
         this.doPostApi(dynamicRoutesGroup, data)
         .then(({status, data}) => {

@@ -58,6 +58,34 @@ function DynamicRoutes(props) {
       updateRoutes();
     }, []);
 
+    const getRouteCode = (route) => {
+      manager.GetRouteCode(route,
+        (status, data) => {
+          switch (status) {
+            case 200:
+              console.log(JSON.stringify({
+                message: data,
+                status: 200,
+              }));
+              setCurUpdatingCode(data)
+              break
+            default:
+              alert(JSON.stringify({
+                message: `Your request seems wrong for route: ${route} bla`,
+                status: status,
+                error: data.error,
+              }));
+          }
+        },
+        (error) => {
+          alert(JSON.stringify({
+            message: 'Failed to update routes',
+            error: error,
+          }));
+        },
+      )
+    }
+
     const addRoute = (route, code) => {
         manager.AddRoute({
           path: route,
@@ -291,7 +319,9 @@ function DynamicRoutes(props) {
                   setCurUpdatingCode(newCurCode);
                 }
               }}
-            ></textarea>
+            >
+              {showUpdateDialog ? getRouteCode(curUpdatingRoute) : mandatoryCodePrefix}
+            </textarea>
           </div>
           <Button
             variant='outlined'
