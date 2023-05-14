@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button } from '@mui/material';
 
-function NavBar({appModes, setAppMode, className}) {
+function NavBar({appModes, appMode, setAppMode, className}) {
   return (
   <div className={className}>
     <h2>Server modes:</h2>
@@ -14,6 +14,7 @@ function NavBar({appModes, setAppMode, className}) {
             <Button
               key={modeName}
               variant='contained'
+              color={appModes[modeName] === appMode ? "success" : "primary"}
               onClick={() => setAppMode(appModes[modeName])}
             >
               {appModes[modeName]}
