@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BackendEndpoint = 'http://62.84.125.40';
+const BackendEndpoint = 'http://51.250.91.250';
 
 export function InitManagers() {
     axios.defaults.mode = 'no-cors';
@@ -38,9 +38,6 @@ export class ManagerBase {
         const url = BackendEndpoint + route;
 
         try {
-            // let config = {
-            //     crossdomain: true,
-            // }
             const response = await axios.get(url);
             console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
             return {
