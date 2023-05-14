@@ -16,6 +16,12 @@ export class ManagerBase {
         return await this.doGet(url);
     }
 
+    async doGetApi(route, params) {
+        const url = '/api' + route;
+
+        return await this.doGet(url, params);
+    }
+
     async doPostApi(route, data) {
         const url = '/api' + route;
 
@@ -39,6 +45,22 @@ export class ManagerBase {
 
         try {
             const response = await axios.get(url);
+            console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
+            return {
+                status: response.status,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error(`GET ${route} failed:\n ${error}`);
+            throw error;
+        }
+    }
+
+    async doGet(route, params) {
+        const url = BackendEndpoint + route;
+
+        try {
+            const response = await axios.get(url, {params});
             console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
             return {
                 status: response.status,

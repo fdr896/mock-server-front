@@ -38,6 +38,7 @@ function App() {
     <div className='same-row'>
       <NavBar
         appModes={AppMode}
+        appMode={appMode}
         setAppMode={setAppMode}
         className='same-row'
       />
