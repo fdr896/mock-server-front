@@ -13,7 +13,7 @@ import { DynamicRoutesManager } from './managers/dynamic_routes_manager';
 function DynamicRoutes(props) {
     let manager = new DynamicRoutesManager();
 
-    const mandatoryCodePrefix = 'def func(';
+    const mandatoryCodePrefix = 'def func(headers, body):\n    ';
 
     const [routes, setRoutes] = useState([]);
 
@@ -26,6 +26,7 @@ function DynamicRoutes(props) {
 
     const [curUpdatingRoute, setCurUpdatingRoute] = useState('');
     const [curUpdatingCode, setCurUpdatingCode] = useState(mandatoryCodePrefix);
+    const [codeUpdated, setCodeUpdated] = useState(false);
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [failedInputCode, setFailedInputCode] = useState(false);
 
@@ -57,6 +58,34 @@ function DynamicRoutes(props) {
     useEffect(() => {
       updateRoutes();
     }, []);
+
+    const getRouteCode = (route) => {
+      manager.GetRouteCode(route,
+        (status, data) => {
+          switch (status) {
+            case 200:
+              console.log(JSON.stringify({
+                message: data,
+                status: 200,
+              }));
+              setCurUpdatingCode(data)
+              break
+            default:
+              alert(JSON.stringify({
+                message: `Your request seems wrong for route: ${route}`,
+                status: status,
+                error: data.error,
+              }));
+          }
+        },
+        (error) => {
+          alert(JSON.stringify({
+            message: 'Failed to update routes',
+            error: error,
+          }));
+        },
+      )
+    }
 
     const addRoute = (route, code) => {
         manager.AddRoute({
@@ -289,9 +318,12 @@ function DynamicRoutes(props) {
                 if (newCurCode.length >= mandatoryCodePrefix.length) {
                   setFailedInputCode(false);
                   setCurUpdatingCode(newCurCode);
+                  setCodeUpdated(true);
                 }
               }}
-            ></textarea>
+            >
+              {showUpdateDialog ? (codeUpdated ? curUpdatingCode : getRouteCode(curUpdatingRoute)) : mandatoryCodePrefix}
+            </textarea>
           </div>
           <Button
             variant='outlined'
@@ -311,6 +343,7 @@ function DynamicRoutes(props) {
               setShowUpdateDialog(false);
               updateRoute(curUpdatingRoute, curUpdatingCode);
               setCurUpdatingCode(mandatoryCodePrefix);
+              setCodeUpdated(false);
             }}
           >Update</Button>
           <Button variant='outlined'

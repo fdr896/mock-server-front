@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BackendEndpoint = 'http://62.84.125.40';
+const BackendEndpoint = 'http://localhost:1337';
 
 export function InitManagers() {
     axios.defaults.mode = 'no-cors';
@@ -14,6 +14,12 @@ export class ManagerBase {
         const url = '/api' + route;
 
         return await this.doGet(url);
+    }
+
+    async doGetApi(route, params) {
+        const url = '/api' + route;
+
+        return await this.doGet(url, params);
     }
 
     async doPostApi(route, data) {
@@ -39,6 +45,22 @@ export class ManagerBase {
 
         try {
             const response = await axios.get(url);
+            console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
+            return {
+                status: response.status,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error(`GET ${route} failed:\n ${error}`);
+            throw error;
+        }
+    }
+
+    async doGet(route, params) {
+        const url = BackendEndpoint + route;
+
+        try {
+            const response = await axios.get(url, {params});
             console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
             return {
                 status: response.status,
