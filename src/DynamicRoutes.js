@@ -71,7 +71,7 @@ function DynamicRoutes(props) {
               break
             default:
               alert(JSON.stringify({
-                message: `Your request seems wrong for route: ${route} bla`,
+                message: `Your request seems wrong for route: ${route}`,
                 status: status,
                 error: data.error,
               }));
