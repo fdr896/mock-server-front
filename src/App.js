@@ -4,11 +4,13 @@ import './App.css';
 import NavBar from './NavBar';
 import StaticRoutes from './StaticRoutes';
 import DynamicRoutes from './DynamicRoutes';
+import ProxyRoutes from './ProxyRoutes';
 import { InitManagers } from './managers/base_manager';
 
 const AppMode = {
   StaticMocks: 'Static Mocks',
   DynamicMocks: 'Dynamic Mocks',
+  ProxyRoutes: 'Proxy routes',
   MessageQueues: 'Message queue mocks',
 };
 
@@ -18,6 +20,8 @@ function ShowAppService({appMode, className}) {
       return <StaticRoutes className={className} />;
     case AppMode.DynamicMocks:
       return <DynamicRoutes className={className} />;
+    case AppMode.ProxyRoutes:
+      return <ProxyRoutes className={className} />;
     case AppMode.MessageQueues:
       return <h1 className={className}>Not implemented, GO AWAY!</h1>;
     default:
