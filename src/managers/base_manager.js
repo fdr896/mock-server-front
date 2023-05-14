@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BackendEndpoint = 'http://62.84.125.40';
+const BackendEndpoint = 'http://localhost:1337';
 
 export function InitManagers() {
     axios.defaults.mode = 'no-cors';

@@ -13,7 +13,7 @@ import { DynamicRoutesManager } from './managers/dynamic_routes_manager';
 function DynamicRoutes(props) {
     let manager = new DynamicRoutesManager();
 
-    const mandatoryCodePrefix = 'def func(';
+    const mandatoryCodePrefix = 'def func(headers, body):\n    ';
 
     const [routes, setRoutes] = useState([]);
 
@@ -26,6 +26,7 @@ function DynamicRoutes(props) {
 
     const [curUpdatingRoute, setCurUpdatingRoute] = useState('');
     const [curUpdatingCode, setCurUpdatingCode] = useState(mandatoryCodePrefix);
+    const [codeUpdated, setCodeUpdated] = useState(false);
     const [showUpdateDialog, setShowUpdateDialog] = useState(false);
     const [failedInputCode, setFailedInputCode] = useState(false);
 
@@ -317,10 +318,11 @@ function DynamicRoutes(props) {
                 if (newCurCode.length >= mandatoryCodePrefix.length) {
                   setFailedInputCode(false);
                   setCurUpdatingCode(newCurCode);
+                  setCodeUpdated(true);
                 }
               }}
             >
-              {showUpdateDialog ? getRouteCode(curUpdatingRoute) : mandatoryCodePrefix}
+              {showUpdateDialog ? (codeUpdated ? curUpdatingCode : getRouteCode(curUpdatingRoute)) : mandatoryCodePrefix}
             </textarea>
           </div>
           <Button
@@ -341,6 +343,7 @@ function DynamicRoutes(props) {
               setShowUpdateDialog(false);
               updateRoute(curUpdatingRoute, curUpdatingCode);
               setCurUpdatingCode(mandatoryCodePrefix);
+              setCodeUpdated(false);
             }}
           >Update</Button>
           <Button variant='outlined'
