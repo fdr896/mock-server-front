@@ -143,7 +143,7 @@ function ProxyRoutes(props) {
       .then(({status, data}) => {
         switch (status) {
           case 200:
-            alert(data)
+            alert(JSON.stringify(data))
             break;
           
           default:
