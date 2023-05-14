@@ -38,6 +38,9 @@ export class ManagerBase {
         const url = BackendEndpoint + route;
 
         try {
+            // let config = {
+            //     crossdomain: true,
+            // }
             const response = await axios.get(url);
             console.debug(`GET ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
             return {

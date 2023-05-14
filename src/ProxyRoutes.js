@@ -139,7 +139,7 @@ function ProxyRoutes(props) {
     };
 
     const proxyRoute = (route) => {
-      manager.doPost(route, {})
+      manager.doGet(route)
       .then(({status, data}) => {
         switch (status) {
           case 200:
