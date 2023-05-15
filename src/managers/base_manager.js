@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BackendEndpoint = 'http://51.250.91.250';
+const BackendEndpoint = 'http://62.84.125.40';
 
 export function InitManagers() {
     axios.defaults.mode = 'no-cors';
@@ -26,6 +26,12 @@ export class ManagerBase {
         const url = '/api' + route;
 
         return await this.doPost(url, data);
+    }
+
+    async doPostApiWithParams(route, params) {
+        const url = '/api' + route;
+
+        return await this.doPostWithParams(url, params);
     }
 
     async doPutApi(route, data) {
@@ -77,6 +83,22 @@ export class ManagerBase {
 
         try {
             const response = await axios.post(url, data);
+            console.debug(`POST ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
+            return {
+                status: response.status,
+                data: response.data,
+            };
+        } catch (error) {
+            console.log(`POST ${route} failed:\n ${error}`);
+            throw error;
+        }
+    }
+
+    async doPostWithParams(route, params) {
+        const url = BackendEndpoint + route;
+
+        try {
+            const response = await axios.post(url, {}, {params});
             console.debug(`POST ${route} returned: status: ${response.status},\n data: ${JSON.stringify(response.data)}`);
             return {
                 status: response.status,
