@@ -3,9 +3,6 @@ import React, { useEffect, useState} from 'react';
 import { Button, Input } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
-import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism.css';
-
 import { ProxyRoutesManager } from './managers/proxy_routes_manager';
 
 function ProxyRoutes(props) {
