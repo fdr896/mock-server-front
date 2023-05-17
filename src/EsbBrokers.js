@@ -8,6 +8,7 @@ import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism.css';
 
+import { BackendEndpoint } from './managers/base_manager';
 import { PoolBrokersManager } from './managers/pool_brokers_manager';
 import { EsbBrokersManager } from './managers/esb_brokers_manager';
 
@@ -69,7 +70,7 @@ function EsbBrokers(props) {
         (status, data) => {
           switch (status) {
             case 200:
-              alert(data);
+              window.open(BackendEndpoint + `/api/brokers/esb/code?pool_in=${poolName}`, "_blank", "noopener,noreferrer");
               break;
 
             default:
@@ -293,11 +294,33 @@ function EsbBrokers(props) {
       });
     };
 
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`ESB updateReadMsgs for ${curMsgsPoolOut}`)
+        if (showMsgsDialog) {
+          updateReadMsgs(curMsgsPoolOut)
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPoolOut])
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`ESB updateWriteMsgs for ${curMsgsPoolIn}`)
+        if (showMsgsDialog) {
+          updateWriteMsgs(curMsgsPoolIn)
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPoolIn])
+
     return (
-    <div {...props}>
-      <div className='same-row'>
+    <>
+      <div className={props.className}>
         <div>
-          <p><b>Connect existing message pools in ESB pair:</b></p>
+          <h3>Connect existing message pools in ESB pair:</h3>
         </div>
 
         <div>
@@ -377,7 +400,7 @@ function EsbBrokers(props) {
         </div>
       </div>
 
-      <div className='same-row'>
+      <div className={props.className}>
         <h3>Your ESB pairs!</h3>
         <ul>
             {records.map((record, index) => {
@@ -394,7 +417,7 @@ function EsbBrokers(props) {
                     style={{marginRight: '1em'}}
                     onClick={() => deleteRecord(record.pool_name_in)}
                   >Delete</Button>
-                  <Button variant='outlined' onClick={() => {
+                  <Button variant='outlined' style={{marginRight: '1em'}} onClick={() => {
                     getMapperCode(record.pool_name_in);
                   }}
                   >Mapper code</Button>
@@ -417,7 +440,8 @@ function EsbBrokers(props) {
 
       <Dialog
         open={showMsgsDialog}
-        fullScreen={true}
+        fullWidth={true}
+        maxWidth={'md'}
       >
         <DialogTitle>
           ESB pair ({curMsgsPoolIn} ==&gt; {curMsgsPoolOut}) messages
@@ -435,13 +459,6 @@ function EsbBrokers(props) {
               style={{float: 'left'}}
             >
                 <p>Write messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateWriteMsgs(curMsgsPoolIn);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -472,13 +489,6 @@ function EsbBrokers(props) {
               style={{float: 'right'}}
             >
                 <p>Read messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateReadMsgs(curMsgsPoolOut);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -548,7 +558,7 @@ function EsbBrokers(props) {
           >Send</Button>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
     );
 }
 

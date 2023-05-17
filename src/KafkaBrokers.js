@@ -3,6 +3,7 @@ import React, { useEffect, useState} from 'react';
 import { Button } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
+import { BackendEndpoint } from './managers/base_manager';
 import { PoolBrokersManager } from './managers/pool_brokers_manager';
 
 function KafkaBrokers(props) {
@@ -66,7 +67,7 @@ function KafkaBrokers(props) {
                 message: data,
                 status: 200,
               }));
-              alert(JSON.stringify(data));
+              window.open(BackendEndpoint + `/api/brokers/pool/config?pool=${poolName}`, "_blank", "noopener,noreferrer");
               break
             default:
               alert(JSON.stringify({
@@ -258,11 +259,33 @@ function KafkaBrokers(props) {
       });
     };
 
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`Kafka updateReadMsgs for ${curMsgsPool}`)
+        if (showMsgsDialog) {
+          updateReadMsgs(curMsgsPool)
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPool])
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`Kafka updateWriteMsgs for ${curMsgsPool}`)
+        if (showMsgsDialog) {
+          updateWriteMsgs(curMsgsPool)
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPool])
+
     return (
-    <div {...props}>
-      <div className='same-row'>
+    <>
+      <div className={props.className}>
         <div>
-          <p><b>Type message pool that you want to mock:</b></p>
+          <h3>Type message pool that you want to mock:</h3>
         </div>
 
         <div>
@@ -311,7 +334,7 @@ function KafkaBrokers(props) {
         </div>
       </div>
 
-      <div className='same-row'>
+      <div className={props.className}>
         <h3>Your pools!</h3>
         <ul>
             {pools.map((pool, index) => {
@@ -328,7 +351,7 @@ function KafkaBrokers(props) {
                     style={{marginRight: '1em'}}
                     onClick={() => deletePool(pool.pool_name)}
                   >Delete</Button>
-                  <Button variant='outlined' onClick={() => {
+                  <Button variant='outlined' style={{marginRight: '1em'}} onClick={() => {
                     getPoolConfig(pool.pool_name);
                   }}
                   >Get Config</Button>
@@ -350,7 +373,8 @@ function KafkaBrokers(props) {
 
       <Dialog
         open={showMsgsDialog}
-        fullScreen={true}
+        fullWidth={true}
+        maxWidth={'md'}
       >
         <DialogTitle>
           Pool {curMsgsPool} messages
@@ -368,13 +392,6 @@ function KafkaBrokers(props) {
               style={{float: 'left'}}
             >
                 <p>Write messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateWriteMsgs(curMsgsPool);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -405,13 +422,6 @@ function KafkaBrokers(props) {
               style={{float: 'right'}}
             >
                 <p>Read messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateReadMsgs(curMsgsPool);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -481,7 +491,7 @@ function KafkaBrokers(props) {
           >Send</Button>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
     );
 }
 

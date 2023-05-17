@@ -155,10 +155,10 @@ function ProxyRoutes(props) {
     }
 
     return (
-    <div {...props}>
-      <div className='same-row'>
+    <>
+      <div className={props.className}>
         <div>
-          <p><b>Type route that you want to proxy:</b></p>
+          <h3>Type route that you want to proxy:</h3>
         </div>
 
         <div>
@@ -212,7 +212,7 @@ function ProxyRoutes(props) {
         </div>
       </div>
 
-      <div className='same-row'>
+      <div className={props.className}>
         <h3>Your routes!</h3>
         <ul>
             {routes.map((route, index) => {
@@ -275,7 +275,7 @@ function ProxyRoutes(props) {
           Discard</Button>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
     );
 }
 
