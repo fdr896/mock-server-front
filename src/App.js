@@ -44,16 +44,16 @@ function App() {
   const [appMode, setAppMode] = useState(AppMode.EsbBrokers);
 
   return (
-    <div className='same-row'>
+    <div className='row'>
       <NavBar
         appModes={AppMode}
         appMode={appMode}
         setAppMode={setAppMode}
-        className='same-row'
+        className='col'
       />
       <ShowAppService
         appMode={appMode}
-        className='same-row'
+        className='col'
       />
     </div>
   );

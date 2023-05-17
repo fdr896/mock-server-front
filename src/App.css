@@ -1,6 +1,11 @@
-.same-row {
-    float: left;
-    margin: 3em;
+.row {
+    display: flex;
+}
+.col {
+    width: 30%;
+    padding: 4rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .clickable {

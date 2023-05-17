@@ -159,10 +159,10 @@ function StaticRoutes(props) {
     }
 
     return (
-    <div {...props}>
-      <div className='same-row'>
+    <>
+      <div className={props.className}>
         <div>
-          <p><b>Type route that you want to mock:</b></p>
+          <h3>Type route that you want to mock:</h3>
         </div>
 
         <div>
@@ -216,7 +216,7 @@ function StaticRoutes(props) {
         </div>
       </div>
 
-      <div className='same-row'>
+      <div className={props.className}>
         <h3>Your routes!</h3>
         <ul>
             {routes.map((route, index) => {
@@ -277,7 +277,7 @@ function StaticRoutes(props) {
           Discard</Button>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
     );
 }
 

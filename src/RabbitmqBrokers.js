@@ -3,6 +3,7 @@ import React, { useEffect, useState} from 'react';
 import { Button } from '@mui/material';
 import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 
+import { BackendEndpoint } from './managers/base_manager';
 import { PoolBrokersManager } from './managers/pool_brokers_manager';
 
 function RabbitmqBrokers(props) {
@@ -66,7 +67,8 @@ function RabbitmqBrokers(props) {
                 message: data,
                 status: 200,
               }));
-              alert(JSON.stringify(data));
+              window.open(BackendEndpoint + `/api/brokers/pool/config?pool=${poolName}`, "_blank", "noopener,noreferrer");
+              // alert(JSON.stringify(data));
               break
             default:
               alert(JSON.stringify({
@@ -258,11 +260,33 @@ function RabbitmqBrokers(props) {
       });
     };
 
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`RabbitMQ updateReadMsgs for ${curMsgsPool}`);
+        if (showMsgsDialog) {
+          updateReadMsgs(curMsgsPool);
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPool])
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        console.log(`RabbitMQ updateWriteMsgs for ${curMsgsPool}`);
+        if (showMsgsDialog) {
+          updateWriteMsgs(curMsgsPool);
+        }
+      }, 1000);
+    
+      return () => clearInterval(interval);
+    }, [curMsgsPool])
+
     return (
-    <div {...props}>
-      <div className='same-row'>
+    <>
+      <div className={props.className}>
         <div>
-          <p><b>Type message pool that you want to mock:</b></p>
+          <h3>Type message pool that you want to mock:</h3>
         </div>
 
         <div>
@@ -311,7 +335,7 @@ function RabbitmqBrokers(props) {
         </div>
       </div>
 
-      <div className='same-row'>
+      <div className={props.className}>
         <h3>Your pools!</h3>
         <ul>
             {pools.map((pool, index) => {
@@ -328,7 +352,7 @@ function RabbitmqBrokers(props) {
                     style={{marginRight: '1em'}}
                     onClick={() => deletePool(pool.pool_name)}
                   >Delete</Button>
-                  <Button variant='outlined' onClick={() => {
+                  <Button variant='outlined' style={{marginRight: '1em'}} onClick={() => {
                     getPoolConfig(pool.pool_name);
                   }}
                   >Get Config</Button>
@@ -336,6 +360,7 @@ function RabbitmqBrokers(props) {
                     variant='outlined'
                     style={{marginRight: '1em'}}
                     onClick={() => {
+                      console.log(`setCurMsgsPool to ${pool.pool_name}`)
                       setCurMsgsPool(pool.pool_name);
                       updateReadMsgs(pool.pool_name);
                       updateWriteMsgs(pool.pool_name);
@@ -350,7 +375,8 @@ function RabbitmqBrokers(props) {
 
       <Dialog
         open={showMsgsDialog}
-        fullScreen={true}
+        fullWidth={true}
+        maxWidth={'md'}
       >
         <DialogTitle>
           Pool {curMsgsPool} messages
@@ -368,13 +394,6 @@ function RabbitmqBrokers(props) {
               style={{float: 'left'}}
             >
                 <p>Write messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateWriteMsgs(curMsgsPool);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -405,13 +424,6 @@ function RabbitmqBrokers(props) {
               style={{float: 'right'}}
             >
                 <p>Read messages:</p>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    updateReadMsgs(curMsgsPool);
-                  }}
-                >
-                Refresh</Button>
                 <Button
                   variant='outlined'
                   onClick={() => {
@@ -481,7 +493,7 @@ function RabbitmqBrokers(props) {
           >Send</Button>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
     );
 }
 
