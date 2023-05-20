@@ -268,7 +268,7 @@ function KafkaBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPool])
+    }, [curMsgsPool, showMsgsDialog])
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -279,7 +279,7 @@ function KafkaBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPool])
+    }, [curMsgsPool, showMsgsDialog])
 
     return (
     <>

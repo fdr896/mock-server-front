@@ -269,7 +269,7 @@ function RabbitmqBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPool])
+    }, [curMsgsPool, showMsgsDialog])
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -280,7 +280,7 @@ function RabbitmqBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPool])
+    }, [curMsgsPool, showMsgsDialog])
 
     return (
     <>

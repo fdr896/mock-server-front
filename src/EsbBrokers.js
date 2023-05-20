@@ -303,7 +303,7 @@ function EsbBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPoolOut])
+    }, [curMsgsPoolOut, showMsgsDialog])
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -314,7 +314,7 @@ function EsbBrokers(props) {
       }, 1000);
     
       return () => clearInterval(interval);
-    }, [curMsgsPoolIn])
+    }, [curMsgsPoolIn, showMsgsDialog])
 
     return (
     <>
