@@ -172,7 +172,7 @@ function StaticRoutes(props) {
                 <input
                     id='route-add'
                     value={curRoute}
-                    patter='\/[A-Za-z0-9_\?\/=]+'
+                    pattern='\/[A-Za-z0-9_\?\/=]+'
                     onChange={(e) => {
                       setFailedInput(false);
 
