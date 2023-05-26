@@ -168,7 +168,7 @@ function ProxyRoutes(props) {
                 <input
                     id='route-add'
                     value={curRoute}
-                    pattern='\/[A-Za-z0-9_]+'
+                    pattern='\/[A-Za-z0-9_\?\/=]+'
                     onChange={(e) => {
                       setFailedInput(false);
 
@@ -178,7 +178,7 @@ function ProxyRoutes(props) {
                       if (newCurRoute.length < curRoute.length) {
                         setCurRoute(newCurRoute);
                       } else if (curRoute.length === 0) {
-                        setCurRoute(newCurRoute === '/' ? newCurRoute : curRoute);
+                        setCurRoute(newCurRoute.startsWith('/') ? newCurRoute : curRoute);
                       } else {
                         setCurRoute(valid ? newCurRoute : curRoute);
                       }
